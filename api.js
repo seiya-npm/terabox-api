@@ -64,7 +64,7 @@ function signDownload(s1, s2) {
 class TeraBoxApp {
     FormUrlEncoded = FormUrlEncoded;
     SignDownload = signDownload;
-    TERABOX_TIMEOUT = 10000;
+    TERABOX_TIMEOUT = 60000;
     
     data = {
         csrf: '',
@@ -629,7 +629,7 @@ class TeraBoxApp {
         }
     }
     
-    async uploadChunk(data, partseq, chunk, onBodySentHandler, externalAbort) {
+    async uploadChunk(data, partseq, async_blob, onBodySentHandler, externalAbort) {
         // extra abort signal
         externalAbort = externalAbort ? externalAbort : new AbortController().signal;
         // timeout abort signal
@@ -639,6 +639,7 @@ class TeraBoxApp {
         const dispatcher = new Agent().compose((dispatch) => {
             class undiciInterceptorBody extends DecoratorHandler {
                 onBodySent(chunk) {
+                    // console.log(chunk.length);
                     let chunkSize = chunk.length;
                     const chunckTxt = (new TextDecoder()).decode(chunk);
                     if(chunckTxt.match(/^------formdata-undici-/)){
@@ -672,7 +673,7 @@ class TeraBoxApp {
         }
         
         const formData = new FormData();
-        formData.append('file', chunk);
+        formData.append('file', await async_blob, 'blob');
 
         const req = await dispatcher.request({
             origin: url.origin,

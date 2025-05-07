@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import readline from 'node:readline';
+import { Readable } from 'stream';
 
 import input from '@inquirer/input';
 import select from '@inquirer/select';
@@ -356,15 +357,7 @@ async function uploadChunkTask(app, data, filePath, partSeq, uploadData, externa
         
         uploadData.parts[partSeq] = 0;
         const chunk = fs.createReadStream(filePath, {start, end});
-        const blob = {
-            type: 'application/octet-stream',
-            name: 'file',
-            [Symbol.toStringTag]: 'Blob',
-            size: end-start+1,
-            stream() {
-                return chunk;
-            }
-        }
+        const blob = new Response(Readable.toWeb(chunk)).blob()
         
         try{
             const r = await app.uploadChunk(data, partSeq, blob, onBodySentHandler, externalAbort);
