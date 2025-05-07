@@ -24,7 +24,7 @@ importers:
         specifier: ^5.0.0
         version: 5.1.2
       undici:
-        specifier: '7'
+        specifier: ^7.8.0
         version: 7.8.0
       yaml:
         specifier: ^2.5.1

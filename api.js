@@ -630,6 +630,8 @@ class TeraBoxApp {
     }
     
     async uploadChunk(data, partseq, async_blob, onBodySentHandler, externalAbort) {
+        // undici v7 update
+        const is_undici7 = true;
         // extra abort signal
         externalAbort = externalAbort ? externalAbort : new AbortController().signal;
         // timeout abort signal
@@ -639,15 +641,16 @@ class TeraBoxApp {
         const dispatcher = new Agent().compose((dispatch) => {
             class undiciInterceptorBody extends DecoratorHandler {
                 onBodySent(chunk) {
-                    // console.log(chunk.length);
-                    let chunkSize = chunk.length;
-                    const chunckTxt = (new TextDecoder()).decode(chunk);
-                    if(chunckTxt.match(/^------formdata-undici-/)){
-                        chunkSize = -1;
-                    }
-                    timeoutId.refresh();
-                    if (onBodySentHandler){
-                        onBodySentHandler(chunkSize);
+                    if(!is_undici7){
+                        let chunkSize = chunk.length;
+                        const chunckTxt = (new TextDecoder()).decode(chunk);
+                        if(chunckTxt.match(/^------formdata-undici-/)){
+                            chunkSize = -1;
+                        }
+                        timeoutId.refresh();
+                        if (onBodySentHandler){
+                            onBodySentHandler(chunkSize);
+                        }
                     }
                 }
             }
@@ -674,6 +677,7 @@ class TeraBoxApp {
         
         const formData = new FormData();
         formData.append('file', await async_blob, 'blob');
+        const blob_size = formData.get('file').size;
 
         const req = await dispatcher.request({
             origin: url.origin,
@@ -702,6 +706,11 @@ class TeraBoxApp {
             // todo make skip hash check if data.skip_hash === true;
             if (res.md5 !== data.hash.chunks[partseq]) {
                 throw new Error(`MD5 hash mismatch for file (part: ${partseq+1})`)
+            }
+            else{
+                if (is_undici7 && onBodySentHandler){
+                    onBodySentHandler(blob_size);
+                }
             }
         }
         else {

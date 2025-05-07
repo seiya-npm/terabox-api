@@ -1,7 +1,7 @@
 {
     "name": "terabox-api",
     "name_ext": "TeraBox API",
-    "version": "1.0.6",
+    "version": "1.1.0",
     "main": "api.js",
     "type": "module",
     "scripts": {
@@ -27,7 +27,7 @@
         "dateformat": "^5.0.3",
         "filesize": "^10.1.6",
         "tough-cookie": "^5.0.0",
-        "undici": "7",
+        "undici": "^7.8.0",
         "yaml": "^2.5.1"
     }
 }
