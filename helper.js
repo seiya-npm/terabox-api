@@ -284,7 +284,7 @@ async function hashFile(filePath, skipChunks) {
     }
 }
 
-async function runWithConcurrencyLimit(tasks, limit) {
+async function runWithConcurrencyLimit(data, tasks, limit) {
     let index = 0;
     let failed = false;
     
@@ -292,6 +292,13 @@ async function runWithConcurrencyLimit(tasks, limit) {
         while (index < tasks.length && !failed) {
             const currentIndex = index++;
             const result = await tasks[currentIndex]();
+            if(result.done){
+                data.uploaded[result.part] = true;
+                result.uploadLog(result.part_size);
+            }
+            if(result.done && !data.hash.chunks[result.part]){
+                data.hash.chunks[result.part] = result.res.md5;
+            }
         }
     };
     
@@ -299,13 +306,13 @@ async function runWithConcurrencyLimit(tasks, limit) {
     
     try{
         await Promise.all(workers);
-        return true;
     }
     catch(error){
         console.error('\n[ERROR]', unwrapErrorMessage(error));
         failed = true;
-        return false;
     }
+    
+    return {ok: !failed, data: data};
 };
 
 function printProgressLog(prepText, sentData, fsize){
@@ -339,10 +346,7 @@ async function uploadChunkTask(app, data, file, partSeq, uploadData, externalAbo
     const end = Math.min(start + splitSize, data.size) - 1;
     const maxTries = uploadData.maxTries;
     
-    const onBodySentHandler = (chunkSize) => {
-        if (externalAbort.aborted) {
-            return;
-        }
+    const uploadLog = (chunkSize) => {
         uploadData.all += chunkSize;
         uploadData.parts[partSeq] += chunkSize;
         printProgressLog('Uploading', uploadData, data.size);
@@ -354,10 +358,11 @@ async function uploadChunkTask(app, data, file, partSeq, uploadData, externalAbo
         }
         
         const blob = file.slice(start, end+1);
+        const blob_size = end + 1 - start;
         
         try{
-            const r = await app.uploadChunk(data, partSeq, blob, onBodySentHandler, externalAbort);
-            return { part: partSeq, r, done: true };
+            const res = await app.uploadChunk(data, partSeq, blob, null, externalAbort);
+            return { part: partSeq, part_size: blob_size, uploadLog, res, done: true };
             break;
         }
         catch(error){
@@ -428,7 +433,7 @@ async function uploadChunks(app, data, filePath, maxTasks = 10, maxTries = 5) {
         }
         
         const cMaxTasks = totalChunks > maxTasks ? maxTasks : totalChunks;
-        const upload_status = await runWithConcurrencyLimit(tasks, cMaxTasks);
+        const upload_status = await runWithConcurrencyLimit(data, tasks, cMaxTasks);
         console.log(); // reset stdout after process.write
         externalAbortController.abort();
         return upload_status;

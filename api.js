@@ -629,32 +629,10 @@ class TeraBoxApp {
         }
     }
     
-    async uploadChunk(data, partseq, blob, onBodySentHandler, externalAbort) {
-        // extra abort signal
-        externalAbort = externalAbort ? externalAbort : new AbortController().signal;
-        // timeout abort signal
+    async uploadChunk(data, partseq, blob, reqHandler, externalAbort) {
         const timeoutAborter = new AbortController;
         const timeoutId = setTimeout(() => { timeoutAborter.abort(); }, this.TERABOX_TIMEOUT);
-        // custom dispatcher
-        const dispatcher = new Agent().compose((dispatch) => {
-            class undiciInterceptorBody extends DecoratorHandler {
-                onBodySent(chunk) {
-                    let chunkSize = chunk.length;
-                    const chunckTxt = (new TextDecoder()).decode(chunk);
-                    if(chunckTxt.match(/^------formdata-undici-/)){
-                        chunkSize = -1;
-                    }
-                    timeoutId.refresh();
-                    if (onBodySentHandler){
-                        onBodySentHandler(chunkSize);
-                    }
-                }
-            }
-            return function InterceptedDispatch(opts, handler) {
-                return dispatch(opts, new undiciInterceptorBody(handler));
-            };
-        });
-        // --
+        externalAbort = externalAbort ? externalAbort : new AbortController().signal;
         
         const url = new URL(`${this.params.uhost}/rest/2.0/pcs/superfile2`);
         url.search = new URLSearchParams({
@@ -673,10 +651,8 @@ class TeraBoxApp {
         
         const formData = new FormData();
         formData.append('file', blob, 'blob');
-
-        const req = await dispatcher.request({
-            origin: url.origin,
-            path: `${url.pathname}${url.search}`,
+        
+        const req = await request(url, {
             method: 'POST',
             body: formData,
             headers: {
@@ -698,8 +674,7 @@ class TeraBoxApp {
         const res = await req.body.json();
         
         if (!res.error_code) {
-            // todo make skip hash check if data.skip_hash === true;
-            if (res.md5 !== data.hash.chunks[partseq]) {
+            if (data.hash.chunks[partseq] && res.md5 !== data.hash.chunks[partseq]) {
                 throw new Error(`MD5 hash mismatch for file (part: ${partseq+1})`)
             }
         }
