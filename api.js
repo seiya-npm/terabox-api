@@ -64,7 +64,7 @@ function signDownload(s1, s2) {
 class TeraBoxApp {
     FormUrlEncoded = FormUrlEncoded;
     SignDownload = signDownload;
-    TERABOX_TIMEOUT = 60000;
+    TERABOX_TIMEOUT = 10000;
     
     data = {
         csrf: '',
@@ -629,9 +629,7 @@ class TeraBoxApp {
         }
     }
     
-    async uploadChunk(data, partseq, async_blob, onBodySentHandler, externalAbort) {
-        // undici v7 update
-        const is_undici7 = true;
+    async uploadChunk(data, partseq, blob, reqHandler, externalAbort) {
         // extra abort signal
         externalAbort = externalAbort ? externalAbort : new AbortController().signal;
         // timeout abort signal
@@ -639,26 +637,23 @@ class TeraBoxApp {
         const timeoutId = setTimeout(() => { timeoutAborter.abort(); }, this.TERABOX_TIMEOUT);
         // custom dispatcher
         const dispatcher = new Agent().compose((dispatch) => {
-            class undiciInterceptorBody extends DecoratorHandler {
+            class undiciIntercept extends DecoratorHandler {
                 onBodySent(chunk) {
-                    if(!is_undici7){
-                        let chunkSize = chunk.length;
-                        const chunckTxt = (new TextDecoder()).decode(chunk);
-                        if(chunckTxt.match(/^------formdata-undici-/)){
-                            chunkSize = -1;
-                        }
-                        timeoutId.refresh();
-                        if (onBodySentHandler){
-                            onBodySentHandler(chunkSize);
-                        }
+                    let chunkSize = chunk.length;
+                    const chunckTxt = (new TextDecoder()).decode(chunk);
+                    if(chunckTxt.match(/^------formdata-undici-/)){
+                        chunkSize = -1;
+                    }
+                    timeoutId.refresh();
+                    if (reqHandler){
+                        reqHandler(chunkSize);
                     }
                 }
             }
             return function InterceptedDispatch(opts, handler) {
-                return dispatch(opts, new undiciInterceptorBody(handler));
+                return dispatch(opts, new undiciIntercept(handler));
             };
         });
-        // --
         
         const url = new URL(`${this.params.uhost}/rest/2.0/pcs/superfile2`);
         url.search = new URLSearchParams({
@@ -676,8 +671,7 @@ class TeraBoxApp {
         }
         
         const formData = new FormData();
-        formData.append('file', await async_blob, 'blob');
-        const blob_size = formData.get('file').size;
+        formData.append('file', blob, 'blob');
 
         const req = await dispatcher.request({
             origin: url.origin,
@@ -706,11 +700,6 @@ class TeraBoxApp {
             // todo make skip hash check if data.skip_hash === true;
             if (res.md5 !== data.hash.chunks[partseq]) {
                 throw new Error(`MD5 hash mismatch for file (part: ${partseq+1})`)
-            }
-            else{
-                if (is_undici7 && onBodySentHandler){
-                    onBodySentHandler(blob_size);
-                }
             }
         }
         else {
