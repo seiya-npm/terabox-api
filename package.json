@@ -23,7 +23,7 @@
     },
     "dependencies": {
         "crc-32": "^1.2.2",
-        "filesize": "^10.1.6",
+        "filesize": "^11.0.0",
         "tough-cookie": "^5.0.0",
         "undici": "^7.10.0"
     }
