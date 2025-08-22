@@ -493,6 +493,7 @@ class TeraBoxApp {
         space_total: Math.pow(1024, 3),
         space_available: Math.pow(1024, 3),
         cursor: 'null',
+        guessing_tid: 235611687159
     };
     
     /**
@@ -2382,6 +2383,81 @@ class TeraBoxApp {
         }
         catch (error) {
             throw new Error('getPublicKey', { cause: error });
+        }
+    }
+
+    /**
+     * Starts a guessing match
+     * @param {*} room_level - The level of the guessing room (0-3)
+     * @returns 
+     */
+    async guessingMatch(room_level) {
+        const url = new URL(this.params.whost + '/act/v2/component/guessing/match');
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            tid: this.params.guessing_tid,
+            room_level
+        });
+
+        try {
+            const req = await request(url, {
+                method: 'GET',
+                body: null,
+                headers: {
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+
+            const rdata = await req.body.json();
+
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('guessingMatch', { cause: error });
+        }
+    }
+
+    /**
+     * Plays the guessing game
+     * @param {*} room_level - The level of the guessing room (0-3)
+     * @returns 
+     */
+    async guessingPlay(room_level) {
+        const url = new URL(this.params.whost + '/act/v2/component/guessing/play');
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            tid: this.params.guessing_tid,
+            room_level,
+            cancel: false // false to play, true to cancel
+        });
+
+        try {
+            const req = await request(url, {
+                method: 'GET',
+                body: null,
+                headers: {
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+
+            const rdata = await req.body.json();
+            return rdata;
+            //outcome 0=win, 1=lose, 2=tie
+        }
+        catch (error) {
+            throw new Error('guessingPlay', { cause: error });
         }
     }
 }
