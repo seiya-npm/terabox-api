@@ -1561,20 +1561,21 @@ class TeraBoxApp {
     }
     
     /**
-     * Attempts a upload file from remote server
-     * @param {string} urls - Source urls (coma-separated)
-     * @param {string} remote_dir - Remote directory path
-     * @returns {Promise<Object>} The remote upload response JSON (indicates success or fallback)
+     * Get task list for Cloud_DL service
+     * @returns {Promise<Object>} Cloud_DL service task list JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200, or request fails
      */
-    async remoteUpload(urls, remote_dir = '/Remote Upload'){
+    async clouddl_tasklist(){
         const formData = new this.FormUrlEncoded({
-            urls: urls,
-            upload_to: remote_dir,
+            method: 'list_task',
+            // limit: 20,
+            // start: 0,
+            need_task_info: 1,
+            // status: 255,
         });
         
-        const url = new URL(this.params.whost + '/webmaster/remoteupload/submit');
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         
         try{
             const req = await request(url, {
@@ -1596,7 +1597,47 @@ class TeraBoxApp {
             return rdata;
         }
         catch (error) {
-            throw new Error('remoteUpload', { cause: error });
+            throw new Error('clouddl_tasklist', { cause: error });
+        }
+    }
+    
+    /**
+     * Cloud_DL service, query magnet link info
+     * @param {string} magnet_link - magnet link url
+     * @returns {Promise<Object>} Cloud_DL service task list JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200/403, or request fails
+     */
+    async clouddl_query_magnetinfo(magnet_link){
+        const formData = new this.FormUrlEncoded({
+            method: 'query_magnetinfo',
+            source_url: magnet_link,
+            type: 4,
+        });
+        
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (![200, 403].includes(req.statusCode)) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('clouddl_query_magnetinfo', { cause: error });
         }
     }
     
