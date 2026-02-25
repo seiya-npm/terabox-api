@@ -1660,7 +1660,7 @@ class TeraBoxApp {
      * @param {string} sha1hash     - torrent hash (fetch it from clouddl_query_sinfo), empty string for magnet
      * @param {string} save_path    - remote save path
      * @param {string} selected_idx - select file indexes from torrent file / magnet (comma-separated with starting index 1), if empty download all files
-     * @returns {Promise<Object>} Cloud_DL service task list JSON
+     * @returns {Promise<Object>} Cloud_DL service task info JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200/400/403/500, or request fails
      */
@@ -1721,7 +1721,7 @@ class TeraBoxApp {
     /**
      * Cloud_DL service: Query torrent file info
      * @param {string} source_path - file path to the torrent file on TB drive
-     * @returns {Promise<Object>} Cloud_DL magnet link info JSON
+     * @returns {Promise<Object>} Cloud_DL torrent file info JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200/403/404/500, or request fails
      */
