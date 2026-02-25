@@ -1561,7 +1561,7 @@ class TeraBoxApp {
     }
     
     /**
-     * Get task list for Cloud_DL service
+     * Cloud_DL service: Get task list
      * @returns {Promise<Object>} Cloud_DL service task list JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200, or request fails
@@ -1602,9 +1602,155 @@ class TeraBoxApp {
     }
     
     /**
-     * Cloud_DL service, query magnet link info
-     * @param {string} magnet_link - magnet link url
+     * Cloud_DL service: Query task info
+     * @param {string} task_id - Task ID info
+     * @returns {Promise<Object>} Cloud_DL service task info JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200/403, or request fails
+     */
+    async clouddl_query_task(task_id){
+        const formData = new this.FormUrlEncoded({
+            method: 'query_task',
+            task_ids: task_id,
+            op_type: 1,
+        });
+        
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (![200, 403].includes(req.statusCode)) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('clouddl_query_task', { cause: error });
+        }
+    }
+    
+    /**
+     * Cloud_DL service: Add task
+     * @param {string} source       - remote torrent file path or magnet link
+     * @param {string} sha1hash     - torrent hash (fetch it from clouddl_query_sinfo), empty string for magnet
+     * @param {string} save_path    - remote save path
+     * @param {string} selected_idx - select file indexes from torrent file / magnet (comma-separated with starting index 1)
      * @returns {Promise<Object>} Cloud_DL service task list JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200/400/403/500, or request fails
+     */
+    async clouddl_add_task(source = '', sha1hash = '', selected_idx, save_path){
+        const formData = new this.FormUrlEncoded({
+            method: 'add_task',
+            save_path: save_path,
+            selected_idx: selected_idx,
+        });
+        
+        if(typeof source === "string" && source.trim().toLowerCase().startsWith('magnet:?xt=urn:btih:')){
+            formData.append('task_from', '1');
+            formData.append('source_url', source);
+            formData.append('file_sha1', '');
+            formData.append('type', '4');
+            
+        }
+        else{
+            formData.append('task_from', '2');
+            formData.append('source_path', source);
+            formData.append('file_sha1', sha1hash);
+            formData.append('type', '2');
+        }
+        
+        // alternative url is https://od.terabox.com/api/od_dl
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            jsToken: this.data.jsToken,
+            bdstoken: this.data.bdstoken,
+        });
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (![200, 400, 403, 500].includes(req.statusCode)) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('clouddl_add_task', { cause: error });
+        }
+    }
+    
+    /**
+     * Cloud_DL service: Query torrent file info
+     * @param {string} source_path - file path to the torrent file on TB drive
+     * @returns {Promise<Object>} Cloud_DL magnet link info JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200/403/404/500, or request fails
+     */
+    async clouddl_query_sinfo(source_path){
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        
+        url.search = new URLSearchParams({
+            method: 'query_sinfo',
+            ...this.params.app,
+            //jsToken: this.data.jsToken,
+            //bdstoken: this.data.bdstoken,
+            source_path: source_path,
+            type: 2,
+        });
+        
+        try{
+            const req = await request(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (![200, 403, 404, 500].includes(req.statusCode)) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('clouddl_query_sinfo', { cause: error });
+        }
+    }
+    
+    /**
+     * Cloud_DL service: Query magnet link info
+     * @param {string} magnet_link - magnet link url
+     * @returns {Promise<Object>} Cloud_DL magnet link info JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200/403, or request fails
      */
