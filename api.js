@@ -1723,7 +1723,7 @@ class TeraBoxApp {
      * @param {string} task_id - Task to cancel by id
      * @returns {Promise<Object>} Cloud_DL service task info JSON
      * @async
-     * @throws {Error} Throws error if HTTP status is not 200/400, or request fails
+     * @throws {Error} Throws error if HTTP status is not 200/400/404, or request fails
      */
     async clouddl_cancel_task(task_id){
         const formData = new this.FormUrlEncoded({
@@ -1768,7 +1768,7 @@ class TeraBoxApp {
      * @param {string} task_id - Task to delete by id
      * @returns {Promise<Object>} Cloud_DL service task info JSON
      * @async
-     * @throws {Error} Throws error if HTTP status is not 200/400, or request fails
+     * @throws {Error} Throws error if HTTP status is not 200/400/404, or request fails
      */
     async clouddl_delete_task(task_id){
         const formData = new this.FormUrlEncoded({
