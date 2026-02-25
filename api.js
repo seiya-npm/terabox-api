@@ -1625,7 +1625,7 @@ class TeraBoxApp {
         const formData = new this.FormUrlEncoded({
             method: 'query_task',
             task_ids: task_id,
-            op_type: 1,
+            op_type: 1, // 0: Check task information, 1: Check progress information
         });
         
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
@@ -1659,12 +1659,12 @@ class TeraBoxApp {
      * @param {string} source       - remote torrent file path or magnet link
      * @param {string} sha1hash     - torrent hash (fetch it from clouddl_query_sinfo), empty string for magnet
      * @param {string} save_path    - remote save path
-     * @param {string} selected_idx - select file indexes from torrent file / magnet (comma-separated with starting index 1)
+     * @param {string} selected_idx - select file indexes from torrent file / magnet (comma-separated with starting index 1), if empty download all files
      * @returns {Promise<Object>} Cloud_DL service task list JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200/400/403/500, or request fails
      */
-    async clouddl_add_task(source = '', sha1hash = '', selected_idx, save_path){
+    async clouddl_add_task(source = '', sha1hash = '', selected_idx = '', save_path = '/Remote Upload'){
         const formData = new this.FormUrlEncoded({
             method: 'add_task',
             save_path: save_path,
