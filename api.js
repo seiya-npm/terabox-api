@@ -1616,19 +1616,24 @@ class TeraBoxApp {
     
     /**
      * Cloud_DL service: Query task info
-     * @param {string} task_id - Task ID info (comma-separated)
+     * @param {string} task_ids - Task ID info (comma-separated)
      * @returns {Promise<Object>} Cloud_DL service task info JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200/403, or request fails
      */
-    async clouddl_query_task(task_id){
+    async clouddl_query_task(task_ids){
         const formData = new this.FormUrlEncoded({
             method: 'query_task',
-            task_ids: task_id,
+            task_ids: task_ids,
             op_type: 1, // 0: Check task information, 1: Check progress information
         });
         
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            jsToken: this.data.jsToken,
+            bdstoken: this.data.bdstoken,
+        });
         
         try{
             const req = await request(url, {
