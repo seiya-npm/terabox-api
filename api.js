@@ -1562,17 +1562,30 @@ class TeraBoxApp {
     
     /**
      * Cloud_DL service: Get task list
+     * @param {string} start  - task list offset
+     * @param {string} limit  - tasks per page
+     * @param {string} status - list tasks status filter,
+     *     <br>0: Download successful
+     *     <br>1: Download in progress
+     *     <br>2: System error
+     *     <br>3: The resource does not exist
+     *     <br>4: Download timeout
+     *     <br>5: The resource exists but the download failed
+     *     <br>6: Insufficient storage space
+     *     <br>7: The target address data already exists
+     *     <br>8: Task canceled
+     *     <br>255: All tasks
      * @returns {Promise<Object>} Cloud_DL service task list JSON
      * @async
      * @throws {Error} Throws error if HTTP status is not 200, or request fails
      */
-    async clouddl_tasklist(){
+    async clouddl_tasklist(start = 0, limit = 20, status = 255){
         const formData = new this.FormUrlEncoded({
             method: 'list_task',
-            // limit: 20,
-            // start: 0,
             need_task_info: 1,
-            // status: 255,
+            start: start,
+            limit: limit,
+            status: status,
         });
         
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
