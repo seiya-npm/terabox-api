@@ -1719,6 +1719,51 @@ class TeraBoxApp {
     }
     
     /**
+     * Cloud_DL service: Cancel task
+     * @param {string} task_id - Task to cancel by id
+     * @returns {Promise<Object>} Cloud_DL service task info JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200/400, or request fails
+     */
+    async clouddl_cancel_task(task_id){
+        const formData = new this.FormUrlEncoded({
+            method: 'cancel_task',
+            task_id: task_id,
+            
+        });
+        
+        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            jsToken: this.data.jsToken,
+            bdstoken: this.data.bdstoken,
+        });
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (![200, 400, 404].includes(req.statusCode)) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('clouddl_cancel_task', { cause: error });
+        }
+    }
+    
+    /**
      * Cloud_DL service: Delete task
      * @param {string} task_id - Task to delete by id
      * @returns {Promise<Object>} Cloud_DL service task info JSON
