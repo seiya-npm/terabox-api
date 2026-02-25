@@ -1658,18 +1658,18 @@ class TeraBoxApp {
             selected_idx: selected_idx,
         });
         
-        if(typeof source === "string" && source.trim().toLowerCase().startsWith('magnet:?xt=urn:btih:')){
+        if(typeof source === 'string' && source.trim().toLowerCase().startsWith('magnet:?xt=urn:btih:')){
             formData.append('task_from', '1');
             formData.append('source_url', source);
             formData.append('file_sha1', '');
-            formData.append('type', '4');
+            formData.append('type', '4'); // 4 is magnet link
             
         }
         else{
             formData.append('task_from', '2');
             formData.append('source_path', source);
             formData.append('file_sha1', sha1hash);
-            formData.append('type', '2');
+            formData.append('type', '2'); // 2 is torrent file
         }
         
         // alternative url is https://od.terabox.com/api/od_dl
