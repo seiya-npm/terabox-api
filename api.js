@@ -1190,6 +1190,42 @@ class TeraBoxApp {
     }
     
     /**
+     * Set user Birthday and set adult status
+     * @param {string}        birthday - User Birthday in YYYY-MM-DD format
+     * @param {number|string} is_adult - Is User adult status (0 or 1)
+     * @returns {Promise<Object>} Status JSON
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200 or request fails
+     */
+    async setUserBirthday(birthday, is_adult){
+        const url = new URL(this.params.whost + '/main/age/set');
+        url.search = new URLSearchParams({
+            birthday: birthday,
+            is_adult: is_adult,
+        });
+        
+        try{
+            const req = await request(url, {
+                headers: {
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('setUserBirthday', { cause: error });
+        }
+    }
+    
+    /**
      * Retrieves the user's coins count (points)
      * @returns {Promise<Object>} The coins count JSON (includes records of coin usage)
      * @async
@@ -1557,6 +1593,46 @@ class TeraBoxApp {
         }
         catch (error) {
             throw new Error('rapidUpload', { cause: error });
+        }
+    }
+    
+    /**
+     * Attempts a upload file from remote server
+     * @param {string} urls - Source urls (coma-separated)
+     * @param {string} remote_dir - Remote directory path
+     * @returns {Promise<Object>} The remote upload response JSON (indicates success or fallback)
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200, or request fails
+     */
+    async remoteUpload(urls, remote_dir = '/Remote Upload'){
+        const formData = new this.FormUrlEncoded({
+            urls: urls,
+            upload_to: remote_dir,
+        });
+        
+        const url = new URL(this.params.whost + '/api/webmaster/remoteupload/submit');
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('remoteUpload', { cause: error });
         }
     }
     
