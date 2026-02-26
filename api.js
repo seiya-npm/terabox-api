@@ -1747,6 +1747,11 @@ class TeraBoxApp {
         });
         
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+        url.search = new URLSearchParams({
+            ...this.params.app,
+            //jsToken: this.data.jsToken,
+            bdstoken: this.data.bdstoken,
+        });
         
         try{
             const req = await request(url, {
@@ -1790,7 +1795,7 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            jsToken: this.data.jsToken,
+            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -1854,7 +1859,7 @@ class TeraBoxApp {
         
         url.search = new URLSearchParams({
             ...this.params.app,
-            jsToken: this.data.jsToken,
+            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -1899,7 +1904,7 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            jsToken: this.data.jsToken,
+            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -1944,7 +1949,7 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            jsToken: this.data.jsToken,
+            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
