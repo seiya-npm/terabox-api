@@ -1637,6 +1637,88 @@ class TeraBoxApp {
     }
     
     /**
+     * Get RemoteUpload list
+     * @param {string} page      - page number
+     * @param {string} page_size - items per page
+     * @param {string} order_by  - sort by field, for example "ctime"
+     * @param {string} order     - asc or desc
+     * @returns {Promise<Object>} Response JSON (indicates success or fallback)
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200, or request fails
+     */
+    async remoteUploadList(page = 1, page_size = 20, order_by = 'ctime', order = 'desc'){
+        const formData = new this.FormUrlEncoded({
+            page: page,
+            page_size: page_size,
+            order: order,
+            by: order_by,
+        });
+        
+        const url = new URL(this.params.whost + '/api/webmaster/remoteupload/record');
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('remoteUploadList', { cause: error });
+        }
+    }
+    
+    /**
+     * Remove task from remote upload api
+     * @param {string} task_id - task id to remove
+     * @returns {Promise<Object>} Response JSON (indicates success or fallback)
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200, or request fails
+     */
+    async remoteUploadDelete(task_id){
+        const formData = new this.FormUrlEncoded({
+            task_id: task_id,
+        });
+        
+        const url = new URL(this.params.whost + '/api/webmaster/remoteupload/delete');
+        
+        try{
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('remoteUpload', { cause: error });
+        }
+    }
+    
+    /**
      * Cloud_DL service: Get task list
      * @param {string} start  - task list offset
      * @param {string} limit  - tasks per page
