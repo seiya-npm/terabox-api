@@ -152,6 +152,23 @@ async function runWithConcurrencyLimit(data, tasks, limit) {
     return {ok: !failed, data: data};
 };
 
+/**
+ * Format seconds to "99h99m99s" string
+ * @param {string} remTimeInt - remaining time in seconds
+ * @returns {Object} return "99h99m99s" string
+ */
+function formatEta(remTimeInt){
+    if (!Number.isFinite(remTimeInt) || remTimeInt < 0) return '---------';
+    const remTimeSec = remTimeInt > 99*3636+35 ? 99*3636+35 : remTimeInt;
+    
+    const remSec = Math.floor(remTimeSec % 60);
+    const remMin = Math.floor((remTimeSec % 3600) / 60);
+    const remHrs = Math.floor(remTimeSec / 3600);
+    const [remH, remM, remS] = [remHrs, remMin, remSec].map(t => String(t).padStart(2, '0'));
+    const remTimeStr = `${remH}h${remM}m${remS}s`;
+    return remTimeStr;
+}
+
 function printProgressLog(prepText, sentData, fsize){
     readline.cursorTo(process.stdout, 0, null);
     
@@ -164,12 +181,7 @@ function printProgressLog(prepText, sentData, fsize){
     const uploadSpeedStr = filesize(uploadSpeed, {standard: 'si', round: 2, pad: true, separator: '.'}) + '/s';
     
     const remainingTimeInt = Math.max((fsize - uploadedBytesSum) / uploadSpeed, 0);
-    const remainingTimeSec = remainingTimeInt > 99*3636+35 ? 99*3636+35 : remainingTimeInt;
-    const remainingSeconds = Math.floor(remainingTimeSec % 60);
-    const remainingMinutes = Math.floor((remainingTimeSec % 3600) / 60);
-    const remainingHours = Math.floor(remainingTimeSec / 3600);
-    const [remH, remM, remS] = [remainingHours, remainingMinutes, remainingSeconds].map(t => String(t).padStart(2, '0'));
-    const remainingTimeStr = `${remH}h${remM}m${remS}s left...`;
+    const remainingTimeStr = formatEta(remainingTimeInt) + ' left...';
     
     const percentage = Math.floor((uploadedBytesSum / fsize) * 100);
     const percentageFStr = `${percentage}% ${uploadedBytesFStr}`;
@@ -356,6 +368,7 @@ function unwrapErrorMessage(err) {
 export {
     getChunkSize,
     hashFile,
+    formatEta,
     uploadChunks,
     unwrapErrorMessage,
 };
