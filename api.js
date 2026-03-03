@@ -1825,36 +1825,47 @@ class TeraBoxApp {
     
     /**
      * Cloud_DL service: Add task
-     * @param {string} source       - remote torrent file path or magnet link
-     * @param {string} sha1hash     - torrent hash (fetch it from clouddl_query_sinfo), empty string for magnet
-     * @param {string} save_path    - remote save path
+     * @param {string} source       - remote torrent file path, ed2k, magnet or https link
+     * @param {string} sha1hash     - torrent hash (fetch it from clouddl_query_sinfo), required for torrent
+     * @param {string} save_path    - remote save path (directory)
      * @param {string} selected_idx - select file indexes from torrent file / magnet (comma-separated with starting index 1)
      * @returns {Promise<Object>} Cloud_DL service task info JSON
      * @async
-     * @throws {Error} Throws error if HTTP status is not 200/400/403/500, or request fails
+     * @throws {Error} Throws error if HTTP status is not 200/400/403/405/500, or request fails
      */
     async clouddl_add_task(source = '', sha1hash = '', selected_idx = '', save_path = '/Remote Upload'){
         const formData = new this.FormUrlEncoded({
             method: 'add_task',
-            save_path: save_path,
-            selected_idx: selected_idx,
         });
         
-        if(typeof source === 'string' && source.trim().toLowerCase().startsWith('magnet:?xt=urn:btih:')){
+        if(typeof source === 'string' && source.trim().toLowerCase().startsWith('https://')){
+            formData.append('type', '0'); // 0 is https link
+            formData.append('task_from', '0');
+            formData.append('source_url', source);
+        }
+        else if(typeof source === 'string' && source.trim().toLowerCase().startsWith('ed2k://')){
+            formData.append('type', '3'); // 3 is ed2k link
+            formData.append('source_url', source);
+        }
+        else if(typeof source === 'string' && source.trim().toLowerCase().startsWith('magnet:')){
+            formData.append('type', '4'); // 4 is magnet link
             formData.append('task_from', '1');
             formData.append('source_url', source);
-            formData.append('file_sha1', '');
-            formData.append('type', '4'); // 4 is magnet link
-            
+            formData.append('selected_idx', selected_idx);
         }
         else{
-            formData.append('task_from', '2');
-            formData.append('source_path', source);
-            formData.append('file_sha1', sha1hash);
             formData.append('type', '2'); // 2 is torrent file
+            formData.append('task_from', '2');
+            formData.append('file_sha1', sha1hash);
+            formData.append('source_path', source);
+            formData.append('selected_idx', selected_idx);
         }
         
-        // alternative url is https://od.terabox.com/api/od_dl
+        formData.append('save_path', save_path);
+        
+        // alternative url is
+        // 'https://od.' + this.TERABOX_DOMAIN + '/api/od_dl'
+        // this.params.whost + '/rest/2.0/services/cloud_dl
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         
         url.search = new URLSearchParams({
@@ -1875,7 +1886,7 @@ class TeraBoxApp {
                 signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
             });
             
-            if (![200, 400, 403, 500].includes(req.statusCode)) {
+            if (![200, 400, 403, 405, 500].includes(req.statusCode)) {
                 throw new Error(`HTTP error! Status: ${req.statusCode}`);
             }
             
@@ -1982,7 +1993,7 @@ class TeraBoxApp {
      * @param {string} source_path - file path to the torrent file on TB drive
      * @returns {Promise<Object>} Cloud_DL torrent file info JSON
      * @async
-     * @throws {Error} Throws error if HTTP status is not 200/403/404/500, or request fails
+     * @throws {Error} Throws error if HTTP status is not 200/400/403/404/500, or request fails
      */
     async clouddl_query_sinfo(source_path){
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
@@ -2007,7 +2018,7 @@ class TeraBoxApp {
                 signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
             });
             
-            if (![200, 403, 404, 500].includes(req.statusCode)) {
+            if (![200, 403, 400, 404, 500].includes(req.statusCode)) {
                 throw new Error(`HTTP error! Status: ${req.statusCode}`);
             }
             
