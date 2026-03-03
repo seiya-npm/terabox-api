@@ -1305,9 +1305,9 @@ class TeraBoxApp {
      *     <br>2: audio
      *     <br>3: pictures
      *     <br>4: documents
-     *     <br>5: apps
+     *     <br>5: apps (not working?)
      *     <br>6: other
-     *     <br>7: torrent
+     *     <br>7: torrent (now included in category 6, not working)
      * @param {string} remoteDir - Remote directory path to list
      * @param {number} [page=1] - Page number for pagination
      * @returns {Promise<Object>} The directory listing JSON (includes entries array)
