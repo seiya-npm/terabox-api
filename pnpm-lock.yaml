@@ -8,6 +8,7 @@ overrides:
   lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
   markdown-it@>=13.0.0 <14.1.1: '>=14.1.1'
   minimatch@>=10.0.0 <10.2.3: '>=10.2.3'
+  underscore@<=1.13.7: '>=1.13.8'
 
 importers:
 
@@ -440,8 +441,8 @@ packages:
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
-  underscore@1.13.7:
-    resolution: {integrity: sha512-GMXzWtsc57XAtguZgaQViUOzs0KTkk8ojr3/xAxXLITqf/3EMwxC0inyETfDFjH/Krbhuep0HNbbjI9i/q3F3g==}
+  underscore@1.13.8:
+    resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
   undici@7.22.0:
     resolution: {integrity: sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==}
@@ -724,7 +725,7 @@ snapshots:
       mkdirp: 1.0.4
       requizzle: 0.2.4
       strip-json-comments: 3.1.1
-      underscore: 1.13.7
+      underscore: 1.13.8
 
   json-buffer@3.0.1: {}
 
@@ -838,7 +839,7 @@ snapshots:
 
   uc.micro@2.1.0: {}
 
-  underscore@1.13.7: {}
+  underscore@1.13.8: {}
 
   undici@7.22.0: {}
 
