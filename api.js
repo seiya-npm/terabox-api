@@ -1299,6 +1299,49 @@ class TeraBoxApp {
     }
     
     /**
+     * Search remote directories and files
+     * @param {string} term - term to search
+     * @param {number} [page=1] - Page number for pagination
+     * @returns {Promise<Object>} The file listing JSON (includes entries array)
+     * @async
+     * @throws {Error} Throws error if HTTP status is not 200 or request fails
+     */
+    async search(term, page = 1){
+        const url = new URL(this.params.whost + '/api/search');
+        
+        try{
+            const formData = new this.FormUrlEncoded();
+            formData.append('order', 'name');
+            formData.append('desc', 0);
+            formData.append('num', 20000);
+            formData.append('page', page);
+            formData.append('recursion', 1);
+            formData.append('key', term);
+            
+            const req = await request(url, {
+                method: 'POST',
+                body: formData.str(),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': this.params.ua,
+                    'Cookie': this.params.cookie,
+                },
+                signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
+            });
+            
+            if (req.statusCode !== 200) {
+                throw new Error(`HTTP error! Status: ${req.statusCode}`);
+            }
+            
+            const rdata = await req.body.json();
+            return rdata;
+        }
+        catch (error) {
+            throw new Error('search', { cause: error });
+        }
+    }
+    
+    /**
      * Retrieves the contents of a remote directory with specific file category
      * @param {number} [categoryId=1] - selected category:
      *     <br>1: video
