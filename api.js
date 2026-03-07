@@ -1879,7 +1879,7 @@ class TeraBoxApp {
         
         try{
             if(typeof source !== 'string'){
-                throw new Error(`Source should be string!`);
+                throw new Error('Source should be string!');
             }
             
             source = source.trim();
@@ -1908,7 +1908,7 @@ class TeraBoxApp {
                 formData.append('selected_idx', selected_idx);
             }
             else{
-                throw new Error(`Unknown Source value!`);
+                throw new Error('Unknown Source value!');
             }
         
             formData.append('save_path', save_path);

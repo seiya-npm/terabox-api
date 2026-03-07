@@ -1,7 +1,7 @@
 {
     "name": "terabox-api",
     "name_ext": "TeraBox API",
-    "version": "2.7.1",
+    "version": "2.8.0",
     "main": "api.js",
     "type": "module",
     "scripts": {
@@ -31,7 +31,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "docdash": "^2.0.2",
-        "eslint": "^10.0.2",
+        "eslint": "^10.0.3",
         "globals": "^17.0.0",
         "jsdoc": "^4.0.4"
     }
