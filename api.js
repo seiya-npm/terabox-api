@@ -1310,17 +1310,15 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/api/search');
         
         try{
-            const formData = new this.FormUrlEncoded();
-            formData.append('order', 'name');
-            formData.append('desc', 0);
-            formData.append('num', 20000);
-            formData.append('page', page);
-            formData.append('recursion', 1);
-            formData.append('key', term);
+            url.searchParams.append('order', 'name');
+            url.searchParams.append('desc', 0);
+            url.searchParams.append('num', 1000);
+            url.searchParams.append('page', page);
+            url.searchParams.append('recursion', 1);
+            url.searchParams.append('key', term);
             
             const req = await request(url, {
-                method: 'POST',
-                body: formData.str(),
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'User-Agent': this.params.ua,
