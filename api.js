@@ -1790,7 +1790,6 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -1836,7 +1835,6 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -1879,43 +1877,51 @@ class TeraBoxApp {
             method: 'add_task',
         });
         
-        if(typeof source === 'string' && source.trim().toLowerCase().startsWith('https://')){
-            formData.append('type', '0'); // 0 is https link
-            formData.append('task_from', '0');
-            formData.append('source_url', source);
-        }
-        else if(typeof source === 'string' && source.trim().toLowerCase().startsWith('ed2k://')){
-            formData.append('type', '3'); // 3 is ed2k link
-            formData.append('source_url', source);
-        }
-        else if(typeof source === 'string' && source.trim().toLowerCase().startsWith('magnet:')){
-            formData.append('type', '4'); // 4 is magnet link
-            formData.append('task_from', '1');
-            formData.append('source_url', source);
-            formData.append('selected_idx', selected_idx);
-        }
-        else{
-            formData.append('type', '2'); // 2 is torrent file
-            formData.append('task_from', '2');
-            formData.append('file_sha1', sha1hash);
-            formData.append('source_path', source);
-            formData.append('selected_idx', selected_idx);
-        }
-        
-        formData.append('save_path', save_path);
-        
-        // alternative url is
-        // 'https://od.' + this.TERABOX_DOMAIN + '/api/od_dl'
-        // this.params.whost + '/rest/2.0/services/cloud_dl
-        const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
-        
-        url.search = new URLSearchParams({
-            ...this.params.app,
-            //jsToken: this.data.jsToken,
-            bdstoken: this.data.bdstoken,
-        });
-        
         try{
+            if(typeof source !== 'string'){
+                throw new Error(`Source should be string!`);
+            }
+            
+            source = source.trim();
+            const srcLC = source.toLowerCase();
+            
+            if(srcLC.startsWith('http://') || srcLC.startsWith('https://')){
+                formData.append('type', '0'); // 0 is http(s) link
+                formData.append('task_from', '0');
+                formData.append('source_url', source);
+            }
+            else if(srcLC.startsWith('/') && srcLC.endsWith('.torrent')){
+                formData.append('type', '2'); // 2 is torrent file
+                formData.append('task_from', '2');
+                formData.append('file_sha1', sha1hash);
+                formData.append('source_path', source);
+                formData.append('selected_idx', selected_idx);
+            }
+            else if(srcLC.startsWith('ed2k://')){
+                formData.append('type', '3'); // 3 is ed2k link
+                formData.append('source_url', source);
+            }
+            else if(srcLC.startsWith('magnet:')){
+                formData.append('type', '4'); // 4 is magnet link
+                formData.append('task_from', '1');
+                formData.append('source_url', source);
+                formData.append('selected_idx', selected_idx);
+            }
+            else{
+                throw new Error(`Unknown Source value!`);
+            }
+        
+            formData.append('save_path', save_path);
+            
+            // alternative url is
+            // 'https://od.' + this.TERABOX_DOMAIN + '/api/od_dl'
+            const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
+            
+            url.search = new URLSearchParams({
+                ...this.params.app,
+                bdstoken: this.data.bdstoken,
+            });
+            
             const req = await request(url, {
                 method: 'POST',
                 body: formData.str(),
@@ -1956,7 +1962,6 @@ class TeraBoxApp {
         const url = new URL(this.params.whost + '/rest/2.0/services/cloud_dl');
         url.search = new URLSearchParams({
             ...this.params.app,
-            //jsToken: this.data.jsToken,
             bdstoken: this.data.bdstoken,
         });
         
@@ -2042,7 +2047,6 @@ class TeraBoxApp {
         url.search = new URLSearchParams({
             method: 'query_sinfo',
             ...this.params.app,
-            //jsToken: this.data.jsToken,
             //bdstoken: this.data.bdstoken,
             source_path: source_path,
             type: 2,
