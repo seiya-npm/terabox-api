@@ -26,7 +26,7 @@
         "crc-32": "^1.2.2",
         "filesize": "^11.0.2",
         "tough-cookie": "^6.0.0",
-        "undici": "^7.22.0"
+        "undici": "^8.0.0"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",

@@ -24,8 +24,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       undici:
-        specifier: ^7.22.0
-        version: 7.22.0
+        specifier: ^8.0.0
+        version: 8.0.0
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -444,9 +444,9 @@ packages:
   underscore@1.13.8:
     resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
-  undici@7.22.0:
-    resolution: {integrity: sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==}
-    engines: {node: '>=20.18.1'}
+  undici@8.0.0:
+    resolution: {integrity: sha512-RGabV5g1ggSX5mU4k+B8BLWgb418gDbg0wAVFeiU00iOxtw4ufGsE6GFsuSd2uqOKooWSLf71JGapOFYpE8f+A==}
+    engines: {node: '>=22.19.0'}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -841,7 +841,7 @@ snapshots:
 
   underscore@1.13.8: {}
 
-  undici@7.22.0: {}
+  undici@8.0.0: {}
 
   uri-js@4.4.1:
     dependencies:
