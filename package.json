@@ -1,7 +1,7 @@
 {
     "name": "terabox-api",
     "name_ext": "TeraBox API",
-    "version": "2.8.0",
+    "version": "2.9.0",
     "main": "api.js",
     "type": "module",
     "scripts": {
@@ -24,15 +24,15 @@
     },
     "dependencies": {
         "crc-32": "^1.2.2",
-        "filesize": "^11.0.2",
-        "tough-cookie": "^6.0.0",
-        "undici": "^7.22.0"
+        "filesize": "^11.0.15",
+        "tough-cookie": "^6.0.1",
+        "undici": "^8.0.1"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "docdash": "^2.0.2",
-        "eslint": "^10.0.3",
-        "globals": "^17.0.0",
-        "jsdoc": "^4.0.4"
+        "eslint": "^10.1.0",
+        "globals": "^17.4.0",
+        "jsdoc": "^4.0.5"
     }
 }
