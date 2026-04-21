@@ -2540,13 +2540,17 @@ class TeraBoxApp {
                 root: 1,
             });
             
+            const buf = crypto.randomBytes(44);
+            const b64 = buf.toString('base64');
+            const cookieWithBrowserId = this.params.cookie + '; browserid=' + b64;
+            
             const connector = buildConnector({ ciphers: tls.DEFAULT_CIPHERS + ':!ECDHE-RSA-AES128-SHA' });
             const client = new Client(this.params.whost, { connect: connector });
             const req = await request(url, {
                 method: 'GET',
                 headers: {
                     'User-Agent': this.params.ua,
-                    'Cookie': this.params.cookie,
+                    'Cookie': cookieWithBrowserId,
                 },
                 dispatcher: client,
                 signal: AbortSignal.timeout(this.TERABOX_TIMEOUT),
