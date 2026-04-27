@@ -1874,6 +1874,7 @@ class TeraBoxApp {
      */
     async clouddl_add_task(source = '', sha1hash = '', selected_idx = '', save_path = '/Remote Upload'){
         const formData = new this.FormUrlEncoded({
+            timeout: 1000 * 60 * 60 * 24,
             method: 'add_task',
         });
         
