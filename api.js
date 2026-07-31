@@ -1566,7 +1566,7 @@ class TeraBoxApp {
      * @param {Object} data - File data including remote_dir, file, size, and hash info
      * @param {string} data.remote_dir - Remote directory path
      * @param {string} data.file - Filename
-     * @param {number} data.size - File size in bytes
+     * @param {number} data.size - File size in bytes, the maximum file size is 20 GiB
      * @param {Object} data.hash - Hash information
      * @param {string} data.hash.file - MD5 hash of full file
      * @param {string} data.hash.slice - MD5 hash of first slice
